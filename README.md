@@ -1,1 +1,1 @@
-# telegram-holet-bot
+# telegram-hotel-bot
