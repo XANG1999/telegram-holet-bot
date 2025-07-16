@@ -1,4 +1,4 @@
-jiimport os
+import os
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from utils import fetch_hotels_from_api, log_user_interaction
