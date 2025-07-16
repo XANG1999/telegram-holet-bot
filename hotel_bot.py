@@ -51,7 +51,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ No matching listings found. Please try different keywords.")
 
 # 🚀 Main bot setup
-async def main():
+if __name__ == "__main__":
+    from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+
+    import os
+
     print("Starting Telegram bot...")
     bot_token = os.environ["BOT_TOKEN"]
     app = ApplicationBuilder().token(bot_token).build()
@@ -61,16 +65,4 @@ async def main():
 
     print("Bot is running and ready.")
 
-    # ✅ This cleanly runs polling without event loop conflicts
-    await app.run_polling(close_loop=False)
-
-if __name__ == "__main__":
-    import asyncio
-
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    loop.run_until_complete(main())
+    app.run_polling()
