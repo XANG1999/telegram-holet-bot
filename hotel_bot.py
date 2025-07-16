@@ -1,56 +1,38 @@
 import os
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-from utils import fetch_hotels_from_api, log_user_interaction
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# /start handler
+# Example /start handler
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    log_user_interaction(user, "start")
-    button = KeyboardButton("📍 Share Current Location", request_location=True)
-    markup = ReplyKeyboardMarkup([[button]], resize_keyboard=True, one_time_keyboard=True)
-    await update.message.reply_text("Welcome! Share your location to find budget-friendly hotels nearby.", reply_markup=markup)
+    await update.message.reply_text(
+        "✅ Welcome to Budget Hotel Finder Bot!\n\n"
+        "📍 Send your location to find nearby budget hotels.\n"
+        "💡 Use /help for assistance."
+    )
 
-# Handle location
-async def location_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    loc = update.message.location
-    lat, lon = loc.latitude, loc.longitude
-    log_user_interaction(user, "location", f"{lat},{lon}")
-    await update.message.reply_text("Fetching budget-friendly hotels near you...")
+# Example /help handler
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Send your live location to get nearby budget hotels.\n"
+        "If you face issues, please try again or contact support."
+    )
 
-    hotels = fetch_hotels_from_api(lat, lon, radius_km=10, max_results=5)
-
-    if not hotels:
-        await update.message.reply_text("No hotels found nearby.")
+def main():
+    # Pull the bot token from environment variables
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if not bot_token:
+        print("❌ TELEGRAM_BOT_TOKEN not set in Railway environment.")
         return
 
-    for hotel in hotels:
-        text = (
-            f"🏨 *{hotel['name']}*\n"
-            f"💰 Price: ₹{hotel['price']}\n"
-            f"📍 Location: {hotel['location']}\n"
-            f"📏 Distance: {hotel['distance']} km"
-        )
-        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔗 Book Now", url=hotel['link'])]])
-        await update.message.reply_markdown(text, reply_markup=keyboard)
+    # Build application
+    app = ApplicationBuilder().token(bot_token).build()
 
-# /help command
-import asyncio
-
-async def main():
-    app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
-
+    # Register command handlers
     app.add_handler(CommandHandler("start", start))
-    # add other handlers
+    app.add_handler(CommandHandler("help", help_command))
 
-    print("Bot is running and ready.")
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
-    await app.stop()
-    await app.shutdown()
+    print("✅ Bot is running and ready.")
+    app.run_polling()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
