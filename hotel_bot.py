@@ -61,10 +61,8 @@ async def main():
 
     print("Bot is running and ready.")
 
-    await app.initialize()                     # ✅ Initialize the application
-    await app.start()                          # ✅ Start the application
-    await app.updater.start_polling()          # ✅ Start polling for updates
-    await app.wait_until_closed()              # ✅ Keep the bot running
+    # ✅ This cleanly runs polling without event loop conflicts
+    await app.run_polling(close_loop=False)
 
 if __name__ == "__main__":
     import asyncio
